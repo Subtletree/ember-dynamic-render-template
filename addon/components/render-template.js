@@ -1,36 +1,23 @@
 import Component from '@ember/component';
-import { setOwner, getOwner } from '@ember/application';
-import { once } from '@ember/runloop';
-import { compileTemplate } from '@ember/template-compilation';
-import { assign } from '@ember/polyfills';
+import { schedule } from '@ember/runloop';
 import layout from '../templates/components/render-template';
-
+import { inject as service } from '@ember/service';
 
 export default Component.extend({
+  dynamicRenderTemplate: inject.service(),
   tagName: '',
   layout,
-
-  props: null,
 
   didReceiveAttrs() {
     this._super(...arguments);
 
-    once(this, function () {
-      let owner = getOwner(this);
-      let _props = this.get('props') || {};
-
-      let props = assign({}, _props, {
-        layout: compileTemplate(this.get('templateString') || ''),
-      });
-
-      let ComponentFactory = owner.factoryFor('component:render-template-result');
-      let componentInstance = ComponentFactory.create(props);
-      let container = document.createElement('div');
-
-      setOwner(componentInstance, owner);
-      componentInstance.appendTo(container);
-
-      this.set('result', container);
+    schedule('sync', () => {
+      this.get('dynamicRenderTemplate').compile(this.get('templateString'), this.get('props'))
+        .then((result) => {
+          this.set('result', result)
+          this.sendAction('onSuccess', result);
+        })
+        .catch((error) => this.sendAction('onError', error));
     });
   }
 });
