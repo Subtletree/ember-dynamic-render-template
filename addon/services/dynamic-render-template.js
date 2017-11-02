@@ -8,37 +8,29 @@ import { Promise } from 'rsvp';
 
 export default Service.extend({
 
-  compile(templateString, props = {}) {
-    return new Promise((resolve, reject) => {
+  compile(templateString = '', props = {}) {
+    let owner = getOwner(this);
 
-      let owner = getOwner(this);
-      let layout;
+    try {
+      props.layout = compileTemplate(templateString || '');
+    } catch(e) {
+      return e;
+    }
+
+    if (props.layout) {
+      let ComponentFactory = owner.factoryFor('component:render-template-result');
+      let componentInstance = ComponentFactory.create(props);
+      let container = document.createElement('div');
+      setOwner(componentInstance, owner);
 
       try {
-        props.layout = compileTemplate(templateString || '');
-      } catch(e) {
-        reject(e);
-      }
-
-      if (layout) {
-        let component = Component.extend({
-          layout,
-          renderer: owner.lookup('renderer:-dom')
-        });
-
-        let ComponentFactory = owner.factoryFor('component:render-template-result');
-        let componentInstance = ComponentFactory.create(props);
-        let container = document.createElement('div');
-
-        setOwner(componentInstance, owner);
         componentInstance.appendTo(container);
-
-        resolve(container);
-      } else {
-        reject();
+      } catch(e) {
+        componentInstance.destroy();
+        return e;
       }
-
-    });
+      return container;
+    }
   }
 
 });

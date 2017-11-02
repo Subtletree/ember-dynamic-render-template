@@ -12,12 +12,13 @@ export default Component.extend({
     this._super(...arguments);
 
     schedule('sync', () => {
-      this.get('dynamicRenderTemplate').compile(this.get('templateString'), this.get('props'))
-        .then((result) => {
-          this.set('result', result)
-          this.sendAction('onSuccess', result);
-        })
-        .catch((error) => this.sendAction('onError', error));
+      let result = this.get('dynamicRenderTemplate').compile(this.get('templateString'), this.get('props'));
+      if (result instanceof Error) {
+        this.sendAction('onError', result)
+      } else {
+        this.set('result', result)
+        this.sendAction('onSuccess', result);
+      }
     });
   }
 });
