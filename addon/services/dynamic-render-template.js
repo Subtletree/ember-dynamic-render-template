@@ -7,7 +7,6 @@ import layout from '../templates/components/render-template';
 import { Promise } from 'rsvp';
 
 export default Service.extend({
-
   compile(templateString = '', props = {}) {
     let owner = getOwner(this);
 
@@ -32,5 +31,4 @@ export default Service.extend({
       return container;
     }
   }
-
 });
