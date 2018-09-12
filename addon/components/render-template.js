@@ -4,7 +4,7 @@ import layout from '../templates/components/render-template';
 import { inject as service } from '@ember/service';
 
 export default Component.extend({
-  dynamicRenderTemplate: inject.service(),
+  dynamicRenderTemplate: service(),
   tagName: '',
   layout,
 
@@ -14,10 +14,14 @@ export default Component.extend({
     schedule('sync', () => {
       let result = this.get('dynamicRenderTemplate').compile(this.get('templateString'), this.get('props'));
       if (result instanceof Error) {
-        this.sendAction('onError', result)
+        if (this.onError) {
+          this.get('onError')(result);
+        }
       } else {
         this.set('result', result)
-        this.sendAction('onSuccess', result);
+        if (this.onSuccess) {
+          this.get('onSuccess')(result);
+        }
       }
     });
   }
