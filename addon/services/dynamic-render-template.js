@@ -1,10 +1,6 @@
 import Service from '@ember/service';
 import { setOwner, getOwner } from '@ember/application';
-import { once } from '@ember/runloop';
 import { compileTemplate } from '@ember/template-compilation';
-import { assign } from '@ember/polyfills';
-import layout from '../templates/components/render-template';
-import { Promise } from 'rsvp';
 
 export default Service.extend({
   compile(templateString = '', props = {}) {
