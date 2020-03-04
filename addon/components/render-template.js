@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import { schedule } from '@ember/runloop';
+import { once } from '@ember/runloop';
 import layout from '../templates/components/render-template';
 import { inject as service } from '@ember/service';
 
@@ -11,7 +11,7 @@ export default Component.extend({
   didReceiveAttrs() {
     this._super(...arguments);
 
-    schedule('sync', () => {
+    once(this, function () {
       let result = this.get('dynamicRenderTemplate').compile(this.get('templateString'), this.get('props'));
       if (result instanceof Error) {
         if (this.onError) {
